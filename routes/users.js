@@ -3,6 +3,7 @@ var router = express.Router();
 const User = require('../models/users');
 const bcrypt = require('bcrypt');
 const uid2 = require('uid2');
+const  {getHashTags} = require('../modules/getHashTags')
 
 /* SIGN UP A USER */
 router.post('/signup', function (req, res) {
@@ -13,14 +14,13 @@ router.post('/signup', function (req, res) {
 
 	User.findOne({ username: req.body.username }).then((data) => {
 		if (data === null) {
+
 			const hash = bcrypt.hashSync(req.body.password, 10);
-			const hashtags = req.body.hashtags
 			const newUser = new User({
 				firstname: req.body.firstname,
 				username: req.body.username,
 				password: hash,
 				token: uid2(32),
-				tweets: [{ date: Date.now(), tweetContent: '', likes: 0 }],
 			});
 			newUser.save().then((data) => res.json({ result: true, data: data }));
 		} else {
@@ -33,7 +33,7 @@ router.post('/signup', function (req, res) {
 /* SIGN IN ALREADY EXISTING USER */
 
 router.post('/signin', (req, res) => {
-	if (req.body.username === '' || req.body.password === '') {
+	if (req.body.username.trim() === '' || req.body.password.trim() === '') {
 		res.json({ result: false, error: 'Missing or empty fields' });
 		return;
 	}
@@ -46,5 +46,23 @@ router.post('/signin', (req, res) => {
 		}
 	});
 });
+
+router.post('/addTweet',(req,res)=>{
+	const hashtags = getHashTags(req.body.tweetContent)
+	User.updateOne(
+		{username:req.body.username},
+		{$push:{tweets:[{ date: Date.now(), tweetContent:req.body.tweetContent, likes: 0,hashtags:hashtags}]}}
+	).then(data=>res.json({result:true}))
+})
+
+router.get('/getTweets',(req,res)=>{
+	User.findOne({username:req.body.username})
+		.then(data=>res.json({result:true,userData:{username:data.username,firstname:data.firstname,token:data.token},tweets:data.tweets.filter(obj=>obj.tweetContent.trim())}))
+
+})
+router.get('/deleteAll',(req,res)=>{
+	User.deleteMany().then(res.json({result:true}))
+
+})
 
 module.exports = router;
