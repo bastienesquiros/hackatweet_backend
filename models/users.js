@@ -10,7 +10,7 @@ const usersSchema = mongoose.Schema({
     firstName:String,
     username:String,
     password:String,
-    tweet:tweetSchema,
+    tweet:[tweetSchema],
 
 })
 
