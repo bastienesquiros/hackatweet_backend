@@ -28,7 +28,6 @@ router.post('/signup', function (req, res) {
 	});
 });
 
-module.exports = router;
 
 /* SIGN IN ALREADY EXISTING USER */
 
@@ -46,3 +45,5 @@ router.post('/signin', (req, res) => {
 		}
 	});
 });
+
+module.exports = router;
