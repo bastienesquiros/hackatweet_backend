@@ -7,7 +7,7 @@ const  {getHashTags} = require('../modules/getHashTags')
 
 /* SIGN UP A USER */
 router.post('/signup', function (req, res) {
-	if (req.body.username === '' || req.body.firstname === '' || req.body.password === '') {
+	if (req.body.username.trim() === '' || req.body.firstname.trim() === '' || req.body.password.trim() === '') {
 		res.json({ result: false, error: 'Missing or Empty fields' });
 		return;
 	}
@@ -55,14 +55,37 @@ router.post('/addTweet',(req,res)=>{
 	).then(data=>res.json({result:true}))
 })
 
-router.get('/getTweets',(req,res)=>{
-	User.findOne({username:req.body.username})
+router.get('/getTweetsByUserName/:username',(req,res)=>{
+	User.findOne({username:req.params.username})
 		.then(data=>res.json({result:true,userData:{username:data.username,firstname:data.firstname,token:data.token},tweets:data.tweets.filter(obj=>obj.tweetContent.trim())}))
 
 })
-router.get('/deleteAll',(req,res)=>{
+router.delete('/deleteAll',(req,res)=>{
 	User.deleteMany().then(res.json({result:true}))
+})
 
+router.get('/getAllTweets',(req,res)=>{
+	User.find().then((data)=>{
+		const transformedData = [];
+
+		for (const user of data) {
+			for (const tweet of user.tweets) {
+				transformedData.push({
+				username: user.username,
+				firstname: user.firstname,
+				date: tweet.date,
+				tweetContent: tweet.tweetContent,
+				hashtags: tweet.hashtags,
+				likes: tweet.likes,
+				_id: tweet._id
+				});
+			}
+		}
+		const dataSorted = transformedData.sort((a,b)=>{
+			return new Date(b.date) - new Date(a.date)
+		})
+		res.json({allTweets:dataSorted})
+	})
 })
 
 module.exports = router;
