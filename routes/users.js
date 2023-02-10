@@ -3,7 +3,7 @@ var router = express.Router();
 const User = require('../models/users');
 const bcrypt = require('bcrypt');
 const uid2 = require('uid2');
-const  {getHashTags} = require('../modules/getHashTags')
+const { getHashTags } = require('../modules/getHashTags');
 
 /* SIGN UP A USER */
 router.post('/signup', function (req, res) {
@@ -14,7 +14,6 @@ router.post('/signup', function (req, res) {
 
 	User.findOne({ username: req.body.username }).then((data) => {
 		if (data === null) {
-
 			const hash = bcrypt.hashSync(req.body.password, 10);
 			const newUser = new User({
 				firstname: req.body.firstname,
@@ -28,7 +27,6 @@ router.post('/signup', function (req, res) {
 		}
 	});
 });
-
 
 /* SIGN IN ALREADY EXISTING USER */
 
